@@ -24,7 +24,7 @@ Vector of length one will be open directly in your default text editor.
 You can install `quickopen` from GitHub with `remotes`:
 
 ``` r
-remotes::install_github("fkeck/quickview")
+remotes::install_github("fkeck/quickopen")
 ```
 Then you will probably want to assign keyboard shortcuts to the `quickopen` commands. In RStudio use Tools > Addins > Browse Addins > Keyboard shortcuts.
 
