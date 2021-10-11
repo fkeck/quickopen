@@ -1,0 +1,91 @@
+
+#' Open datasets in a View tab
+#'
+#' @keywords internal
+#' @importFrom rstudioapi getActiveDocumentContext
+#' @importFrom stringr str_count
+#'
+#' @name quickopen
+"_PACKAGE"
+
+
+#' Open R objects
+#'
+#' @export
+#'
+open_file <- function() {
+  context <- rstudioapi::getActiveDocumentContext()
+
+  if (identical(context$selection[[1]]$range$start,
+                context$selection[[1]]$range$end)) {
+
+    active_row <- context$selection[[1]]$range$start["row"]
+
+    if(grepl("^ *$", context$contents[active_row])){
+      return(invisible(0L))
+    }
+
+    context_com <- detect_com(context$contents)
+    block_id <- context_com[active_row]
+    block <- context$contents[context_com == block_id]
+    block <- paste(block, collapse = "\n")
+
+  } else {
+    block <- context$selection[[1]]$text
+  }
+
+  eval_block <- eval(parse(text = block))
+
+  # eval_block_methods <- unlist(lapply(class(eval_block), function(x)
+  #   attr(methods(class = x), "info")$generic))
+
+  if(is.data.frame(eval_block) |
+     is.matrix(eval_block) |
+     (is.vector(eval_block) & length(eval_block) > 1)) {
+
+    ff <- tempfile(pattern = "quickopen_", fileext = ".csv")
+    eval_block <- as.data.frame(eval_block)
+    write.csv(eval_block, ff)
+
+  } else if (is.vector(eval_block) & length(eval_block) == 1) {
+    ff <- tempfile(pattern = "quickopen_", fileext = ".txt")
+    writeLines(eval_block, ff)
+  } else {
+    stop("Object not supported.")
+  }
+
+  comm <- paste0('xdg-open "', ff, '"')
+  cat("\n", block, "\n")
+  system(comm, wait = FALSE)
+
+}
+
+#' Open file manager in working directory
+#'
+#' @export
+#'
+open_wd <- function() {
+  comm <- paste0('xdg-open "', getwd(), '"')
+  system(comm, wait = FALSE)
+}
+
+# Find blocks of code in a character vector returned by rstudioapi::getActiveDocumentContext()$content
+detect_com <- function(x){
+  regex_op <- "(\\+|-|\\*|/|\\^|%|:|\\$|@|%|<|>|=|!|&|\\||~|,) *$"
+  debt_par <- cumsum(sapply(x, stringr::str_count, pattern = "\\(") - sapply(x, stringr::str_count, pattern = "\\)"))
+  debt_sqb <- cumsum(sapply(x, stringr::str_count, pattern = "\\[") - sapply(x, stringr::str_count, pattern = "\\]"))
+
+  blocks <- vector("integer", length(x))
+  k <- 1
+  for(i in seq_along(blocks)){
+    if(debt_par[i] != 0 || debt_sqb[i] != 0 || grepl(regex_op, x[i]) || grepl("^ *$", x[i]) ) {
+      blocks[i] <- k
+    } else {
+      blocks[i] <- k
+      k <- k + 1L
+    }
+  }
+  return(blocks)
+}
+
+

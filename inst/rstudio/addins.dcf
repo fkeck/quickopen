@@ -1,0 +1,9 @@
+Name: Open working directory
+Description: Quickly open your working directory.
+Binding: open_wd
+Interactive: false
+
+Name: Open object
+Description: Quickly open your objects.
+Binding: open_file
+Interactive: false
