@@ -4,6 +4,14 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
+## Status: <span style="color:red">retired</span>.
+
+<span style="color:red">The package `quickopen` is retired and is no longer maintained: you are encouraged to use the package [quickview](https://github.com/fkeck/quickview) instead</span>.
+
+
+
+## Description
+
 Sometimes you want to quickly view your data. For that there is an addin called `quickview`. But sometimes you need more control than the RStudio viewer and you want to open data in your favorite application. Then there is `quickopen`.
 
 Currently only Linux is supported via xdg.
